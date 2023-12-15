@@ -57,5 +57,10 @@ namespace LerningApi1.Repository
         {
             return (await db .SaveChangesAsync()>0);
         }
+
+        public void DeleteAcync(PlaceOfCity place)
+        {
+            db.PlaceOfCity.Remove(place);
+        }
     }
 }

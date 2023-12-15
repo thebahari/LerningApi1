@@ -12,5 +12,6 @@ namespace LerningApi1.Repository
         Task<PlaceOfCity?> GetPlaceOfCityAcync(int cityId,int placeId);
         Task InsertPlaceOfCity(int cityId,PlaceOfCity place);
         Task<bool> SaveChengesAcync();
+        void DeleteAcync(PlaceOfCity place);
     }
 }

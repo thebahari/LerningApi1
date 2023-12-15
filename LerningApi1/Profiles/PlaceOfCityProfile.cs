@@ -11,6 +11,7 @@ namespace LerningApi1.Profiles
             CreateMap<Entities.PlaceOfCity,Models.PlacesToVisitDto>();
             CreateMap<PlaceViewModel,PlaceOfCity>();
             CreateMap<PlaceUpdateViewModel, PlaceOfCity>();
+            CreateMap<PlaceOfCity,PlaceUpdateViewModel>();
         }
     }
 }

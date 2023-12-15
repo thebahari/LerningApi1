@@ -103,56 +103,53 @@ namespace LerningApi1.Controllers
 
         }
         #endregion
-        //        [HttpPatch("{placeid}/{a}")]
-        //        public ActionResult UpdatePlacePath(int a, int cityid, JsonPatchDocument<PlaceUpdateViewModel> patchDocument, int placeid)
-        //        {
-        //            var c = citiesDataStore.Citys.Find(m => m.Id == cityid);
-        //            if (c == null)
-        //            {
-        //                return NotFound();
-        //            }
-        //            var place = c.placeOfCities.FirstOrDefault(x => placeid == x.Id);
-        //            if (place == null)
-        //            {
-        //                return NotFound();
-        //            }
-        //            var placeviewmodel = new PlaceUpdateViewModel()
-        //            {
-        //                Name = place.Name,
-        //                Description = place.Description
-        //            };
-        //            patchDocument.ApplyTo(placeviewmodel, ModelState);
-        //            if (!ModelState.IsValid)
-        //            {
-        //                return BadRequest();
-        //            }
-        //            if (!TryValidateModel(placeviewmodel))
-        //            {
-        //                return BadRequest(modelState: ModelState);
-        //            }
+        [HttpPatch("{placeid}/{a}")]
+        public async Task<ActionResult> UpdatePlacePath(int a, int cityid,
+            JsonPatchDocument<PlaceUpdateViewModel> patchDocument, int placeid)
+        {
+            if (!await cityRepository.CityExisitsAcync(cityid))
+            {
+                return NotFound();
+            }
+            var place = await cityRepository.GetPlaceOfCityAcync(cityid, placeid);
+            if (place == null)
+            {
+                return NotFound();
+            }
+            var placeToPach=mapper.Map<PlaceUpdateViewModel>(place);
+            patchDocument.ApplyTo(placeToPach,ModelState);
+            if(!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            if(!TryValidateModel(patchDocument))
+            {
+                return BadRequest(ModelState);
+            }
+            mapper.Map(placeToPach,place);
+            
+            await cityRepository.SaveChengesAcync();
+            return NoContent();
 
-        //            place.Name = placeviewmodel.Name;
-        //            place.Description = placeviewmodel.Description;
+        }
+        [HttpDelete("{placeid}")]
+        public async Task<ActionResult> Delete(int placeid, int cityid)
+        {
+            //find city
+            
+            if(!await cityRepository.CityExisitsAcync(cityid))
+                return NotFound();
 
-        //            return NoContent();
+            //find place
+            var place = await cityRepository.GetPlaceOfCityAcync(cityid, placeid);
+            if (place == null)
+                return NotFound();
+            //remove place
+             cityRepository.DeleteAcync(place);
+            await cityRepository.SaveChengesAcync();
+            _mailService.Send("Information", $"place of city{place.Name} with id{placeid} is deleted");
 
-        //        }
-        //        [HttpDelete("{placeid}")]
-        //        public ActionResult Delete(int placeid, int cityid)
-        //        {
-        //            //find city
-        //            var c = citiesDataStore.Citys.Find(x => x.Id == cityid);
-        //            if (c == null)
-        //                return NotFound();
-        //            //find place
-        //            var place = c.placeOfCities.FirstOrDefault(x => x.Id == placeid);
-        //            if (place == null)
-        //                return NotFound();
-        //            //remove place
-        //            c.placeOfCities.Remove(place);
-        //            _mailService.Send("Information", $"place of city{place.Name} with id{placeid} is deleted");
-
-        //            return NoContent();
-        //        }
+            return NoContent();
+        }
     }
 }
